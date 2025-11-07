@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile | Mini Project</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ====== พาเลตสีจากภาพ ====== */
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-image: url('images/redturtle014.jpg'); /* 🔹 เพิ่มพื้นหลัง */
+      background-size: cover; /* ให้ภาพเต็มหน้าจอ */
+      background-position: center; /* จัดให้อยู่ตรงกลาง */
+      background-repeat: no-repeat; /* ไม่ซ้ำภาพ */
+      background-attachment: fixed; /* พื้นหลังคงที่ตอนเลื่อน */
+      color: #1D1D1E; /* Ink */
+      overflow-x: hidden;
+    }
+
+    /* 🔹 Top Bar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1D1D1E; /* Ink */
+      border-bottom: 2px solid #C6953F; /* Gold accent */
+      color: #F9F7F5; /* Offwhite text */
+      padding: 10px 20px;
+      position: relative;
+      z-index: 1001;
+    }
+
+    .menu-btn {
+      font-size: 24px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: #F9F7F5; /* Offwhite */
+    }
+
+    .logout-btn {
+      background: #A31E21; /* Deepred */
+      color: #F9F7F5; /* Offwhite */
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #620A1A; /* Crimson */
+    }
+
+    /* 🔹 Side Menu */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 240px;
+      height: 100%;
+      background: #C6953F; /* Gold */
+      box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+      padding: 20px;
+      transition: left 0.3s ease;
+      z-index: 1000;
+      color: #F9F7F5; /* Offwhite */
+    }
+
+    .side-menu.open { left: 0; }
+
+    .side-menu h3 {
+      margin-top: 0;
+      color: #F9F7F5; /* Offwhite */
+      margin-bottom: 20px;
+    }
+
+    .side-menu a {
+      display: block;
+      padding: 10px 12px;
+      color: #F9F7F5; /* Offwhite */
+      text-decoration: none;
+      border-bottom: 1px solid rgba(249,247,245,0.25);
+      transition: background .15s ease, color .15s ease, transform .1s ease, border-color .15s ease;
+      border-radius: 6px;
+      margin: 6px 4px;
+    }
+
+    .side-menu a:hover,
+    .side-menu a:focus-visible {
+      background: #E9E3D6; /* Beige */
+      color: #1D1D1E; /* Ink */
+      border-bottom-color: transparent;
+      transform: translateY(-1px);
+    }
+
+    /* 🔹 Profile Section */
+    .profile-container {
+      max-width: 700px;
+      margin: 60px auto;
+      padding: 30px;
+      border-radius: 12px;
+      background: #E9E3D6; /* Beige card */
+      border: 1px solid #C6953F; /* Gold */
+      box-shadow: 0 4px 8px rgba(29,29,30,0.06);
+    }
+
+    .profile-header { text-align: center; }
+
+    .profile-header img {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 15px;
+      border: 3px solid #A31E21; /* Deepred ring */
+      background: #F9F7F5;
+    }
+
+    .profile-header h2 {
+      margin: 10px 0 5px;
+      color: #1D1D1E; /* Ink */
+    }
+
+    .profile-header p { color: #620A1A; } /* Crimson subtext */
+
+    .profile-info {
+      margin-top: 25px;
+      font-size: 15px;
+      color: #1D1D1E;
+      line-height: 1.8;
+    }
+    .profile-info strong { color: #1D1D1E; }
+
+    /* 🔹 Image Slider */
+    .image-slider {
+      max-width: 700px;
+      margin: 40px auto;
+      position: relative;
+    }
+
+    .image-slider h3 { margin-left: 10px; color: #1D1D1E; }
+
+    .slider-container {
+      display: flex;
+      overflow-x: auto;
+      gap: 12px;
+      padding: 10px;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      background: #1D1D1E;
+      border-radius: 12px;
+    }
+
+    .slider-container img {
+      width: 160px;
+      height: 160px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 3px solid #A31E21;
+      flex-shrink: 0;
+      scroll-snap-align: start;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background: #F9F7F5;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    .slider-container img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 10px rgba(0,0,0,0.22);
+    }
+
+    .slider-container::-webkit-scrollbar { height: 6px; }
+    .slider-container::-webkit-scrollbar-thumb {
+      background: #C6953F;
+      border-radius: 10px;
+    }
+
+    /* 🔹 Arrow Buttons */
+    .arrow-btn {
+      position: absolute;
+      top: 55%;
+      transform: translateY(-50%);
+      background: rgba(233,227,214,0.95);
+      border: 1px solid #C6953F;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      cursor: pointer;
+      font-size: 20px;
+      color: #1D1D1E;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: background 0.2s, transform 0.1s;
+    }
+    .arrow-btn:hover { background: #C6953F; color: #F9F7F5; }
+    .arrow-btn:active { transform: translateY(-50%) scale(0.98); }
+
+    .arrow-left  { left: -20px; }
+    .arrow-right { right: -20px; }
+    @media (max-width: 768px) {
+      .arrow-left { left: 5px; }
+      .arrow-right { right: 5px; }
+    }
+
+    /* 🔹 Favorites Section */
+    .favorites-section {
+      max-width: 700px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #F9F7F5;
+      border-radius: 12px;
+      border: 1px solid #C6953F; /* เปลี่ยนขอบเป็นสีทองเดียวกับขอบโปรไฟล์ */
+      box-shadow: 0 4px 8px rgba(29,29,30,0.05);
+    }
+
+    .favorites-section h3 {
+      margin-bottom: 20px;
+      color: #1D1D1E;
+      text-align: center;
+    }
+
+    .favorite-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: #FFFFFF;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      border: 1px solid #E9E3D6;
+      transition: all 0.2s ease;
+    }
+
+    .favorite-item:hover {
+      background: #E9E3D6;
+      transform: translateY(-2px);
+      border-color: #C6953F;
+    }
+
+    .favorite-item img {
+      width: 90px;
+      height: 90px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 3px solid #A31E21;
+      flex-shrink: 0;
+      background: #F9F7F5;
+    }
+
+    .fav-text h4 { margin: 0; font-size: 16px; color: #1D1D1E; }
+    .fav-text p  { margin: 6px 0 0; color: #620A1A; }
+
+    /* 🔹 Social Media Links */
+    .social-links {
+      text-align: center;
+      margin: 40px 0 25px;
+    }
+
+    .social-links a {
+      text-decoration: none;
+      margin: 0 12px;
+      display: inline-block;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    .social-links a:hover { transform: scale(1.1); opacity: 0.9; }
+    .social-links img { width: 40px; height: 40px; vertical-align: middle; border-radius: 8px; }
+
+  </style>
+</head>
+<body>
+
+  <!-- 🔹 Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <h3>Menu</h3>
+    <a href="home.html">Home</a>
+    <a href="profile.html">Profile</a>
+    <a href="projects.html">Projects</a>
+  </div>
+
+  <!-- 🔹 Overlay -->
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+  <!-- 🔹 Top Bar -->
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleMenu()">&#9776;</button>
+    <h2 style="margin:0; font-weight:600;">Profile</h2>
+    <button class="logout-btn" onclick="logout()">Log Out</button>
+  </div>
+
+  <!-- 🔹 Profile Content -->
+  <div class="profile-container">
+    <div class="profile-header">
+      <img src="images/รูป7.jpg" alt="Profile Picture">
+      <h2>Sarinda Sukpom</h2>
+      <p>Geography Student | Naresuan University</p>
+    </div>
+
+    <div class="profile-info">
+      <p><strong>📅 Birthday:</strong> 2 April 2005</p>
+      <p><strong>📍 Location:</strong> Phitsanulok, Thailand</p>
+      <p><strong>📚 Major:</strong> Geography</p>
+      <p><strong>💬 Interests:</strong> GIS Web Design</p>
+      <p><strong>📧 Email:</strong> a.aqualette@gmail.com</p>
+    </div>
+  </div>
+
+  <!-- 🔹 Image Slider Section -->
+  <div class="image-slider">
+    <h3>My Gallery</h3>
+    <button class="arrow-btn arrow-left" onclick="slideLeft()">&#10094;</button>
+    <div class="slider-container" id="slider">
+      <img src="images/รูป1.jpg" alt="Gallery 1">
+      <img src="images/รูป2.jpg" alt="Gallery 2">
+      <img src="images/รูป3.jpg" alt="Gallery 3">
+      <img src="images/รูป6.jpg" alt="Gallery 4">
+      <img src="images/รูป5.jpg" alt="Gallery 5">
+      <img src="images/รูป7.jpg" alt="Gallery 6">
+    </div>
+    <button class="arrow-btn arrow-right" onclick="slideRight()">&#10095;</button>
+  </div>
+
+  <!-- 🔹 Favorite Media Section -->
+  <div class="favorites-section">
+    <h3>My Favorites</h3>
+
+    <div class="favorite-item" onclick="window.open('https://youtu.be/kW1e8NtdW90?si=nl1zFtFtD4XtJLP5', '_blank')">
+      <img src="images/Sweet Dreams.jpg" alt="Song 1">
+      <div class="fav-text">
+        <h4>“j-hope ‘Sweet Dreams“</h4>
+        <p>เพลงที่ฟังบ่อย</p>
+      </div>
+    </div>
+
+    <div class="favorite-item" onclick="window.open('https://youtu.be/spPNtsrKfNE?si=6FcflJbnxMSTtmH4', '_blank')">
+      <img src="images/ทางที่ดี.jpg" alt="Song 2">
+      <div class="fav-text">
+        <h4>“loserpop - ทางที่ดี”</h4>
+        <p>เหมาะกับการฟังวันฝนตก</p>
+      </div>
+    </div>
+
+    <div class="favorite-item" onclick="window.open('https://th.wikipedia.org/wiki/%E0%B8%AA%E0%B8%81%E0%B8%B9%E0%B8%9A%E0%B8%B5%E0%B9%89-%E0%B8%94%E0%B8%B9', '_blank')">
+      <img src="images/Scooby-Doo.jpg" alt="Movie 1">
+      <div class="fav-text">
+        <h4>“Scooby-Doo”</h4>
+        <p>การ์ตูนที่ชอบวัยเด็ก</p>
+      </div>
+    </div>
+
+    <div class="favorite-item" onclick="window.open('https://en.wikipedia.org/wiki/The_Princess_Diaries_(film)', '_blank')">
+      <img src="images/เจ้าหญิง.jpg" alt="Song 3">
+      <div class="fav-text">
+        <h4>“The Princess Diaries (2001)</h4>
+        <p>สนุกมาก เป็นเกี่ยวกับเจ้าหญิง</p>
+      </div>
+    </div>
+
+    <div class="favorite-item" onclick="window.open('https://th.wikipedia.org/wiki/%E0%B9%81%E0%B8%AE%E0%B8%A3%E0%B9%8C%E0%B8%A3%E0%B8%B5%E0%B9%88_%E0%B8%9E%E0%B8%AD%E0%B8%95%E0%B9%80%E0%B8%95%E0%B8%AD%E0%B8%A3%E0%B9%8C', '_blank')">
+      <img src="images/Harry Potter.jpg" alt="Movie 2">
+      <div class="fav-text">
+        <h4>“Harry Potter”</h4>
+        <p>ดูเพลินและสนุก</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔹 Social Media Links -->
+  <div class="social-links">
+    <a href="https://www.facebook.com/sarinda.sukpom/" target="_blank">
+      <img src="https://cdn-icons-png.flaticon.com/512/5968/5968764.png" alt="Facebook">
+    </a>
+    <a href="https://www.instagram.com/s.rindkm/" target="_blank">
+      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram">
+    </a>
+    <a href="https://www.youtube.com/@SarinSP" target="_blank">
+      <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube">
+    </a>
+  </div>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('overlay');
+      menu.classList.toggle('open');
+      overlay.classList.toggle('show');
+    }
+    function logout() {
+      alert("ออกจากระบบเรียบร้อย!");
+      window.location.href = "login.html";
+    }
+    function slideLeft() {
+      const slider = document.getElementById('slider');
+      slider.scrollBy({ left: -200, behavior: 'smooth' });
+    }
+    function slideRight() {
+      const slider = document.getElementById('slider');
+      slider.scrollBy({ left: 200, behavior: 'smooth' });
+    }
+  </script>
+
+</body>
+</html>

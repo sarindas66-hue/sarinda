@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | Modern Glass UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+    body {
+      min-height: 100vh;
+      background: url('images/redturtle014.jpg') no-repeat center center/cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      width: 360px;
+      padding: 40px 35px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(15px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .login-container h2 { font-weight: 700; font-size: 28px; margin-bottom: 8px; }
+    .login-container p { font-size: 14px; color: #eaeaea; margin-bottom: 18px; }
+
+    .input-group { position: relative; margin-bottom: 16px; }
+    .input-group input {
+      width: 100%;
+      padding: 12px 45px 12px 15px;
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: 0.2s;
+    }
+    .input-group input:focus {
+      border-color: #fff;
+      background: rgba(255,255,255,0.14);
+    }
+    .input-group input::placeholder { color: #ddd; }
+
+    .input-group i {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #ddd;
+      cursor: pointer;
+      font-size: 18px;
+      transition: color 0.15s;
+      z-index: 2;
+      user-select: none;
+    }
+
+    .input-group i:hover { color: #fff; }
+
+    .message {
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+      min-height: 18px;
+    }
+    .message.error { color: #ffb3b3; }
+    .message.success { color: #c8ffd6; }
+
+    .login-btn {
+      width:100%;
+      padding:12px;
+      background: linear-gradient(90deg,#000000,#5a3c2b,#e8d7b9);
+      background-size:200% 100%;
+      color:#fff;
+      font-size:16px;
+      font-weight:600;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      transition: all 0.35s ease;
+      box-shadow: 0 4px 12px rgba(90,60,43,0.5);
+    }
+    .login-btn:hover { background-position:100% 0; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(90,60,43,0.7); }
+
+    .signup { text-align:center; margin-top:14px; font-size:14px; color:#ddd; }
+    .signup a { color:#fff; font-weight:600; text-decoration:none; }
+
+    .credit { text-align:center; margin-top:12px; font-size:12px; color: rgba(255,255,255,0.7); }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Login</h2>
+    <p>Welcome back please login to your account</p>
+
+    <div class="message" id="message"></div>
+
+    <!-- Username -->
+    <div class="input-group">
+      <input type="text" id="username" placeholder="User Name" autocomplete="username" />
+      <i class="fa-solid fa-user"></i>
+    </div>
+
+    <!-- Password -->
+    <div class="input-group">
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+      <i class="fa-solid fa-eye-slash" id="togglePassword"></i>
+    </div>
+
+    <button class="login-btn" id="loginBtn" type="button">Login</button>
+
+    <div class="signup">Don’t have an account? <a href="#">Signup</a></div>
+    <div class="credit">Created by <strong>Sarinda</strong></div>
+  </div>
+
+  <script>
+    const VALID_USERNAME = 'admin';
+    const VALID_PASSWORD = '1234';
+
+    const usernameEl = document.getElementById('username');
+    const passwordEl = document.getElementById('password');
+    const toggleEl = document.getElementById('togglePassword');
+    const loginBtn = document.getElementById('loginBtn');
+    const messageEl = document.getElementById('message');
+
+    function showMessage(text, type='error') {
+      messageEl.textContent = text;
+      messageEl.className = 'message ' + type;
+    }
+
+    toggleEl.addEventListener('click', function () {
+      const isPwd = passwordEl.getAttribute('type') === 'password';
+      passwordEl.setAttribute('type', isPwd ? 'text' : 'password');
+      this.classList.toggle('fa-eye');
+      this.classList.toggle('fa-eye-slash');
+    });
+
+    function attemptLogin() {
+      const user = usernameEl.value.trim();
+      const pass = passwordEl.value;
+
+      if (!user || !pass) {
+        showMessage('Please enter username and password.');
+        return;
+      }
+
+      if (user === VALID_USERNAME && pass === VALID_PASSWORD) {
+        showMessage('Login successful! Redirecting...', 'success');
+
+        setTimeout(() => {
+          window.location.href = 'home.html'; // ✅ ไปหน้าโปรไฟล์
+        }, 800);
+      } else {
+        showMessage('Invalid username or password.');
+      }
+    }
+
+    loginBtn.addEventListener('click', attemptLogin);
+    [usernameEl, passwordEl].forEach(el => {
+      el.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+    });
+  </script>
+</body>
+</html>

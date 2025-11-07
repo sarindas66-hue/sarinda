@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>map cri</title>
+  <link rel="stylesheet" href="map.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <!-- Mouse Position -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.mouseposition/1.0.1/L.Control.MousePosition.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.mouseposition/1.0.1/L.Control.MousePosition.min.js"></script>
+
+  <!-- Leaflet AJAX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+
+  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+</head>
+<body>
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <h3>Menu</h3>
+    <a href="home.html">Home</a>
+    <a href="profile.html">Profile</a>
+    <a href="projects.html" class="active">Projects</a>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleMenu()">&#9776;</button>
+    <h2 style="margin:0;font-weight:600;">Map Chiang Rai</h2>
+    <button class="logout-btn" onclick="logout()">Log Out</button>
+  </div>
+
+  <!-- Map -->
+  <div id="map"></div>
+
+<script>
+/* ================= Base map ================= */
+var map = L.map('map').setView([19.9105, 99.8406], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution:'&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// Mouse position (lightweight)
+(function(){
+  var MousePos = L.Control.extend({
+    options:{position:'bottomleft'},
+    onAdd:function(){
+      this._container = L.DomUtil.create('div','leaflet-control-mouseposition info');
+      this._container.style.padding='4px 8px';
+      this._container.style.background='rgba(255,255,255,0.8)';
+      this._container.style.boxShadow='0 0 6px rgba(0,0,0,0.2)';
+      this._container.innerHTML='Lat: -, Lng: -';
+      L.DomEvent.disableClickPropagation(this._container);
+      return this._container;
+    },
+    update:function(latlng){
+      this._container.innerHTML = latlng
+        ? ('Lat: '+latlng.lat.toFixed(6)+', Lng: '+latlng.lng.toFixed(6))
+        : 'Lat: -, Lng: -';
+    }
+  });
+  var ctrl = new MousePos(); ctrl.addTo(map);
+  map.on('mousemove', e=>ctrl.update(e.latlng));
+  map.on('mouseout', ()=>ctrl.update(null));
+})();
+
+var building = L.icon({ iconUrl:'images/สัญลักษณ์.png', iconSize:[50,50], iconAnchor:[19,38], popupAnchor:[0,-38] });
+var marker  = L.marker([19.9105,99.8406], {icon:building}).bindPopup("จังหวัดเชียงราย");
+
+var google_map = L.tileLayer('https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}',{maxZoom:18,subdomains:['mt0','mt1','mt3','mt4']});
+var openstreetmap = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18});
+var EsriWorldStreetMap = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:18});
+var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:18});
+var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18});
+var googleHybrid = L.tileLayer('https://{s}.google.com/vt?lyrs=s,h&x={x}&y={y}&z={z}',{maxZoom:20,subdomains:['mt0','mt1','mt2','mt3']});
+
+/* ============ Thematic polygons (unchanged) ============ */
+function getColor(a){return a>1300000000?'#F51D07':a>1100000000?'#E74C3C':a>900000000?'#C0392B':a>700000000?'#9B59B6':a>500000000?'#8E44AD':a>300000000?'#5DADE2':a>150000000?'#48C9B0':'#F9E79F';}
+function style(f){return{fillColor:getColor(f.properties.area),weight:2,opacity:1,color:'red',dashArray:'5',fillOpacity:.7};}
+function highlightFeature(e){var l=e.target;l.setStyle({weight:5,color:'white',dashArray:'',fillOpacity:.9}); if(!L.Browser.ie&&!L.Browser.opera&&!L.Browser.edge) l.bringToFront(); info.update(l.feature.properties);}
+function resetHighlight(e){ThaiProvJSON.resetStyle(e.target);}
+function zoomToFeature(e){map.fitBounds(e.target.getBounds());}
+function onEachFeature(f,l){var p=[]; if(f.properties){for(key in f.properties){p.push(key+": "+f.properties[key]);} l.bindPopup(p.join("<br/>"));} l.on({mouseover:highlightFeature, mouseout:resetHighlight, click:zoomToFeature});}
+
+var ThaiProvJSON = new L.GeoJSON.AJAX(["data/tambon_cri.geojson"],{style,onEachFeature});
+var jsonProv = L.geoJSON(null,{style,onEachFeature});
+$.ajax({dataType:"json", url:"data/json_sql.php",
+  success:function(d){ $(d.features).each(function(k,v){ jsonProv.addData(v); }); },
+  error:function(){ console.log('error geojson'); }
+});
+
+var legend=L.control({position:'bottomright'});
+legend.onAdd=function(){var d=L.DomUtil.create('div','info legend'); d.innerHTML='<h4>คำอธิบายสัญลักษณ์</h4>'; var g=[150000000,300000000,500000000,700000000,900000000,1100000000,1300000000]; for(var i=0;i<g.length;i++){ d.innerHTML+='<i style="background:'+getColor(g[i]+1)+'"></i> '+g[i].toLocaleString()+(g[i+1]?'&ndash;'+g[i+1].toLocaleString()+'<br>':'+'); } return d; };
+map.on('overlayadd',e=>{ if(e.layer===jsonProv||e.layer===ThaiProvJSON) legend.addTo(map); });
+map.on('overlayremove',e=>{ if((e.layer===jsonProv||e.layer===ThaiProvJSON)&&legend._map) map.removeControl(legend); });
+
+var info=L.control({position:'topleft'});
+info.onAdd=function(){ this._div=L.DomUtil.create('div','info'); this.update(); return this._div; };
+info.update=function(area){ this._div.innerHTML='<h4>แผนที่แสดงข้อมูล</h4>'+(area?'<b><center>'+area.prov_nam_t+'</b><br/>':''); };
+info.addTo(map);
+
+var road_cri=L.tileLayer.wms('http://localhost:8080/geoserver/chiang_rai/wms?',{layers:'chiang_rai:road_cri',format:'image/png',transparent:true,tiled:'true'});
+var amp_cri =L.tileLayer.wms('http://localhost:8080/geoserver/chiang_rai/wms?',{layers:'chiang_rai:amp_cri', format:'image/png', transparent:true, tiled:'true'});
+
+/* ============ Click search by distance (unchanged) ============ */
+var showpoint=L.geoJSON(); var marker_arr=[];
+var pointIcon=L.divIcon({className:'custom-point-icon',html:'<div class="point-label"></div>',iconSize:[50,20],iconAnchor:[25,10]});
+var resultIcon=L.icon({iconUrl:'icon/Point.png',iconSize:[32,32],iconAnchor:[16,32],popupAnchor:[0,-32]});
+
+map.on("click",function(e){
+  if(marker_arr.length>0){ for(i=0;i<marker_arr.length;i++){ map.removeLayer(marker_arr[i]); } }
+  var ct = "<center><h3>Search By Distance</h3></center>";
+  ct += "Lat: <input type='number' id='lat' value='"+e.latlng.lat+"'>";
+  ct += "<br>Lng: <input type='number' id='lng' value='"+e.latlng.lng+"'><br>";
+  ct += "Distance (เมตร): <input type='text' id='distance' placeholder='กรุณากรอกค่า'><br>";
+  ct += "<br><center><button onclick='sendtodb()'>Submit</button></center>";
+  var mk=new L.Marker([e.latlng.lat,e.latlng.lng],{icon:pointIcon}).addTo(map).bindPopup(ct).openPopup();
+  marker_arr.push(mk);
+});
+
+function sendtodb(){
+  if(showpoint!=null){ map.removeLayer(showpoint); }
+  var lat=document.getElementById("lat").value;
+  var lng=document.getElementById("lng").value;
+  var distance=document.getElementById("distance").value;
+  if(lat===""||lng===""||distance===""){ alert("กรุณากรอกค่าให้ครบ"); return; }
+  $.ajax({
+    url:"data/query.php", type:"GET", dataType:"json", data:{lat,lng,distance},
+    success:function(data){
+      if(data.error){ alert("เกิดข้อผิดพลาด: "+data.error); return; }
+      showpoint=L.geoJSON(data,{pointToLayer:(f,latlng)=>L.marker(latlng,{icon:resultIcon})}).addTo(map);
+      map.fitBounds(showpoint.getBounds());
+    },
+    error:function(){ alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้"); }
+  });
+}
+
+/* ============ Double click insert point (unchanged) ============ */
+var showpoint1=L.geoJSON(); var marker_arr1=[];
+map.on("dblclick",function(e){
+  if(marker_arr1.length>0){ for(i=0;i<marker_arr1.length;i++){ map.removeLayer(marker_arr1[i]); } }
+  var ct = "<center><h3>เพิ่มข้อมูลตำแหน่งที่คลิก</h3></center>";
+  ct += "Lat: <input type='number' id='lat' value='"+e.latlng.lat+"'>";
+  ct += "<br>Lng: <input type='number' id='lng' value='"+e.latlng.lng+"'><br>";
+  ct += "Name: <input type='text' id='name'><br>";
+  ct += "<br><br><center><button onclick='inserttodb();'>Submit</button></center>";
+  var m1=new L.Marker([e.latlng.lat,e.latlng.lng]).addTo(map).bindPopup(ct).openPopup();
+  marker_arr1.push(m1);
+});
+map.on("contextmenu",function(){ if(marker_arr1.length>0){ for(i=0;i<marker_arr1.length;i++){ map.removeLayer(marker_arr1[i]); } } });
+
+function inserttodb(){
+  if(showpoint1!=null){ map.removeLayer(showpoint1); }
+  var url='data/insert.php', lat=document.getElementById("lat").value, lng=document.getElementById("lng").value, name=document.getElementById("name").value;
+  $.ajax({
+    url:url, type:'GET', datatype:'text', data:{lat,lng,name}, async:false,
+    success:function(d){
+      var geo=JSON.parse(d);
+      var templeIcon=L.icon({iconUrl:'icon/Poin3.png',iconSize:[40,40],iconAnchor:[20,40],popupAnchor:[0,-40]});
+      showpoint1=L.geoJSON(geo,{pointToLayer:(f,latlng)=>L.marker(latlng,{icon:templeIcon})}).addTo(map);
+    }
+  });
+}
+map.doubleClickZoom.disable();
+
+/* =================== SEARCH UI (WITHOUT DELETE) =================== */
+(function(){
+  const tourismLayer = L.layerGroup().addTo(map);
+
+  const TourismSearch = L.Control.extend({
+    options:{position:'topleft'},
+    onAdd:function(){
+      const c = L.DomUtil.create('div','info');
+      c.style.background='rgba(255,255,255,0.95)';
+      c.style.boxShadow='0 0 10px rgba(0,0,0,0.2)';
+      c.style.borderRadius='8px';
+      c.style.padding='8px';
+      c.style.minWidth='280px';
+      c.innerHTML = `
+        <div style="font-weight:600;margin-bottom:6px">ค้นหาสถานที่ท่องเที่ยว</div>
+        <input id="tour-q" type="text" placeholder="กรุณาระบุชื่อสถานที่.." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;outline:none"/>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button id="tour-btn" style="padding:6px 10px;border:0;background:#a31e21;color:#fff;border-radius:6px;cursor:pointer;">ค้นหา</button>
+          <button id="tour-clear" style="padding:6px 10px;border:0;background:#ddd;border-radius:6px;cursor:pointer;">ล้าง</button>
+        </div>
+        <div id="tour-res" style="max-height:220px;overflow:auto;margin-top:8px;border-top:1px solid #eee;padding-top:6px;"></div>
+        <div id="tour-count" style="margin-top:10px;"></div>
+      `;
+      L.DomEvent.disableClickPropagation(c);
+      L.DomEvent.disableScrollPropagation(c);
+
+      const qEl     = c.querySelector('#tour-q');
+      const btn     = c.querySelector('#tour-btn');
+      const clr     = c.querySelector('#tour-clear');
+      const res     = c.querySelector('#tour-res');
+      const countEl = c.querySelector('#tour-count');
+
+      let selectedData = null; 
+      let lastQuery = '';
+
+      const fx6 = n => Number.parseFloat(n).toFixed(6);
+
+      function itemHTML(name, lat, lon, index, id){
+        return `
+          <div class="tour-item" data-lat="${lat}" data-lon="${lon}" data-id="${id||''}" data-name="${name||''}"
+               style="padding:6px;border:1px solid #eee;border-radius:6px;margin-bottom:6px;background:#fff;cursor:pointer">
+            <div style="font-weight:600">${index}. ${name}</div>
+            <div style="font-size:12px;color:#666">Lat: ${(+lat).toFixed(6)}, Lng: ${(+lon).toFixed(6)}</div>
+          </div>`;
+      }
+
+      function showTourPoint(lat, lng, label){
+        const marker = L.marker([+lat,+lng],{
+          icon:L.icon({iconUrl:'icon/Poin3.png',iconSize:[40,40],iconAnchor:[20,40],popupAnchor:[0,-40]}),
+        })
+        .addTo(tourismLayer)
+        .bindPopup(`<b>${label||'สถานที่ท่องเที่ยว'}</b><br>Lat: ${(+lat).toFixed(6)}<br>Lng: ${(+lng).toFixed(6)}`)
+        .openPopup();
+        return marker;
+      }
+
+      function bindSelectable(){
+        res.querySelectorAll('.tour-item').forEach(el => {
+          el.addEventListener('click', () => {
+            res.querySelectorAll('.tour-item.active').forEach(a => {a.classList.remove('active'); a.style.outline='';});
+            el.classList.add('active'); el.style.outline='2px solid #a31e21';
+            const lat = parseFloat(el.getAttribute('data-lat'));
+            const lon = parseFloat(el.getAttribute('data-lon'));
+            const id  = el.getAttribute('data-id')||'';
+            const name = el.getAttribute('data-name') || (el.querySelector('div')?.textContent || 'สถานที่');
+            selectedData = { id, name, lat, lon };
+            showTourPoint(lat, lon, name); map.setView([lat, lon], 15);
+          });
+        });
+      }
+
+      function renderResults(data){
+        tourismLayer.clearLayers(); res.innerHTML='';
+        const total = data?.features ? data.features.length : Array.isArray(data) ? data.length : 0;
+        countEl.textContent = `จำนวนสถานที่ที่ค้นพบ: ${total}`;
+
+        if (data && data.type==='FeatureCollection' && Array.isArray(data.features)){
+          if (data.features.length===0){ res.innerHTML = `<div style="color:#c00">ไม่พบข้อมูล</div>`; return; }
+          const g = L.geoJSON(data, {
+            pointToLayer: (f, latlng) => L.marker(latlng, {
+              icon: L.icon({iconUrl:'icon/Poin3.png',iconSize:[40,40],iconAnchor:[20,40]}),
+            }).bindPopup(`<b>${f.properties?.name||'สถานที่'}</b><br>Lat: ${latlng.lat.toFixed(6)}<br>Lng: ${latlng.lng.toFixed(6)}`)
+          }).addTo(tourismLayer);
+
+          res.innerHTML = data.features.map((f, i) => {
+            const [lon, lat] = f.geometry.coordinates;
+            const name = f.properties?.name || f.properties?.place_name || 'สถานที่';
+            const id = f.properties?.id || f.id || '';
+            return itemHTML(name, lat, lon, i+1, id);
+          }).join('');
+
+          try{
+            const [lon, lat] = data.features[0].geometry.coordinates;
+            showTourPoint(lat, lon, data.features[0].properties?.name || 'สถานที่');
+          } catch (_){}
+
+          bindSelectable(); map.fitBounds(g.getBounds()); return;
+        }
+
+        if (Array.isArray(data)){
+          if (data.length===0){ res.innerHTML = `<div style="color:#c00">ไม่พบข้อมูล</div>`; return; }
+          res.innerHTML = data.map((d, i) => itemHTML(d.name || 'สถานที่', d.lat, d.lng ?? d.lon, i+1, d.id)).join('');
+          bindSelectable();
+          const f = data[0];
+          showTourPoint(parseFloat(f.lat), parseFloat(f.lng ?? f.lon), f.name || 'สถานที่');
+          return;
+        }
+
+        res.innerHTML = `<div style="color:#c00">รูปแบบข้อมูลที่ได้ไม่ถูกต้อง</div>`;
+      }
+
+      async function runSearch(q){
+        res.innerHTML='';
+        if(!q) return;
+        if(q.toLowerCase()==='all') q='';
+        lastQuery = q; 
+
+        res.innerHTML = `<div style="color:#666">กำลังค้นหา...</div>`;
+        try {
+          const r = await fetch(`data/insert.php?action=search&q=${encodeURIComponent(q)}`);
+          const t = await r.text(); let data;
+          try{data = JSON.parse(t);} catch(_){data = null;}
+          if (!data) { res.innerHTML = `<div style="color:#c00">ไม่สามารถอ่านข้อมูลจากเซิร์ฟเวอร์</div>`; return; }
+          if (data.error) { res.innerHTML = `<div style="color:#c00">เกิดข้อผิดพลาด: ${data.error}</div>`; return; }
+          renderResults(data);
+        } catch(e) {
+          console.error(e);
+          res.innerHTML = `<div style="color:#c00">เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</div>`;
+        }
+      }
+
+      // Events for search and clear
+      btn.addEventListener('click', () => runSearch(qEl.value.trim()));
+      qEl.addEventListener('keydown', e => { if (e.key === 'Enter') runSearch(qEl.value.trim()); });
+      clr.addEventListener('click', () => {
+        qEl.value = ''; res.innerHTML = ''; tourismLayer.clearLayers(); countEl.innerHTML = ''; selectedData = null;
+        lastQuery = '';
+      });
+
+      return c;
+    }
+  });
+
+  map.addControl(new TourismSearch());
+})();
+
+/* ================= Rainfall & Waterlevel (unchanged) ================= */
+function getRainfallColor(r){return r>=90?'#08306b':r>=35?'#2171b5':r>=10?'#6baed6':r>=0.1?'#c6dbef':'#f7fbff';}
+function createRainfallPopup(d){
+  var rainfall=(d.rain_24h!=null)?parseFloat(d.rain_24h).toFixed(1):'ไม่มีข้อมูล';
+  var st=(d.station&&d.station.tele_station_name&&d.station.tele_station_name.th)?d.station.tele_station_name.th:'ไม่ระบุ';
+  var g=d.geocode||{}, p=(g.province_name&&g.province_name.th)?g.province_name.th:'ไม่ระบุ',
+      a=(g.amphoe_name&&g.amphoe_name.th)?g.amphoe_name.th:'ไม่ระบุ',
+      t=(g.tumbon_name&&g.tumbon_name.th)?g.tumbon_name.th:'ไม่ระบุ';
+  var dt=d.rainfall_datetime||'ไม่ระบุ';
+  var ag=(d.agency&&d.agency.agency_name&&d.agency.agency_name.th)?d.agency.agency_name.th:'ไม่ระบุ';
+  var basin=(d.basin&&d.basin.basin_name&&d.basin.basin_name.th)?d.basin.basin_name.th:'ไม่ระบุ';
+  return `<div class="rainfall-popup-content"><h4>${st}</h4>
+  <p><strong>ปริมาณน้ำฝน 24 ชม.:</strong> <span style="color:${getRainfallColor(parseFloat(d.rain_24h)||0)};font-weight:bold;">${rainfall} มม.</span></p>
+  <p><strong>วันที่/เวลา:</strong> ${dt}</p>
+  <p><strong>ที่ตั้ง:</strong> ต.${t}, อ.${a}, จ.${p}</p>
+  <p><strong>ลุ่มน้ำ:</strong> ${basin}</p>
+  <p><strong>หน่วยงาน:</strong> ${ag}</p></div>`;
+}
+function createRainfallIcon(r){
+  var color=getRainfallColor(parseFloat(r)||0), size=20+(parseFloat(r)||0)*0.5; if(size<18) size=18;
+  return L.divIcon({className:'rainfall-icon', html:`<div class="rainfall-icon" style="background-color:${color};width:${size}px;height:${size}px;line-height:${size}px;font-size:${Math.max(10,size/3)}px;color:#fff;">${(r!=null)?parseFloat(r).toFixed(1):'-'}</div>`, iconSize:[size,size], iconAnchor:[size/2,size/2], popupAnchor:[0,-size/2]});
+}
+var rainfallLayer=L.layerGroup(), rainfallLegend=L.control({position:'bottomright'});
+rainfallLegend.onAdd=function(){var d=L.DomUtil.create('div','info legend'); d.innerHTML='<h4>ปริมาณน้ำฝน 24 ชม.</h4>'; var g=[0.1,10,35,90], lb=['0.1 - 9.9 มม.','10 - 34.9 มม.','35 - 89.9 มม.','>= 90 มม.']; for(var i=0;i<g.length;i++){ d.innerHTML+='<i style="background:'+getRainfallColor(g[i])+'"></i> '+lb[i]+'<br>'; } return d; };
+fetch('https://api-v3.thaiwater.net/api/v1/thaiwater30/public/rain_24h')
+  .then(r=>{if(!r.ok) throw new Error(r.status); return r.json();})
+  .then(d=>{ if(d&&d.result==='OK'&&d.data){ d.data.forEach(it=>{ var pn=it.geocode&&it.geocode.province_name&&it.geocode.province_name.th; if(pn==='เชียงราย'){ var lat=it.station&&it.station.tele_station_lat, lon=it.station&&it.station.tele_station_long, rf=it.rain_24h; if(lat&&lon){ var m=L.marker([lat,lon],{icon:createRainfallIcon(rf)}).bindPopup(createRainfallPopup(it)); rainfallLayer.addLayer(m); } } }); }})
+  .catch(e=>console.error('rain fetch error',e));
+
+function getWaterlevelColor(l){switch(l){case 5:return '#dc3545';case 4:return '#ffc107';case 3:return '#28a745';default:return '#6c757d';}}
+function getWaterlevelStatusText(l){switch(l){case 5:return 'วิกฤต';case 4:return 'เฝ้าระวัง';case 3:return 'ปกติ';default:return 'ไม่ทราบสถานะ';}}
+function createWaterlevelPopup(d){
+  var st=(d.station&&d.station.tele_station_name&&d.station.tele_station_name.th)?d.station.tele_station_name.th:'ไม่ระบุ';
+  var wl=(d.waterlevel_msl!=null)?parseFloat(d.waterlevel_msl).toFixed(2):'ไม่มีข้อมูล';
+  var ge=d.geocode||{};
+  return `<div class="waterlevel-popup-content"><h4>${st}</h4>
+  <p><strong>สถานะ:</strong> <span class="status-badge" style="background-color:${getWaterlevelColor(d.situation_level)};">${getWaterlevelStatusText(d.situation_level)}</span></p>
+  <p><strong>ระดับน้ำทะเลปานกลาง:</strong> ${wl} ม.</p>
+  <p><strong>ปริมาณน้ำไหลผ่าน:</strong> ${d.discharge?d.discharge+' ลบ.ม./วินาที':'ไม่มีข้อมูล'}</p>
+  <p><strong>ต่างจากระดับตลิ่ง:</strong> ${(d.diff_wl_bank!=null)?parseFloat(d.diff_wl_bank).toFixed(2):'ไม่มีข้อมูล'} ม. (${d.diff_wl_bank_text||'ไม่ระบุ'})</p>
+  <p><strong>ที่ตั้ง:</strong> ต.${(ge.tumbon_name&&ge.tumbon_name.th)?ge.tumbon_name.th:'ไม่ระบุ'}, อ.${(ge.amphoe_name&&ge.amphoe_name.th)?ge.amphoe_name.th:'ไม่ระบุ'}, จ.${(ge.province_name&&ge.province_name.th)?ge.province_name.th:'ไม่ระบุ'}</p>
+  <p><strong>หน่วยงาน:</strong> ${(d.agency&&d.agency.agency_name&&d.agency.agency_name.th)?d.agency.agency_name.th:'ไม่ระบุ'}</p>
+  <p><strong>วันที่/เวลา:</strong> ${d.waterlevel_datetime||'ไม่ระบุ'}</p></div>`;
+}
+var waterlevelLayer=L.layerGroup(), waterlevelLegend=L.control({position:'bottomright'});
+waterlevelLegend.onAdd=function(){var d=L.DomUtil.create('div','info legend'); d.innerHTML='<h4>ระดับน้ำ (ม.)</h4>'; var g=[5,4,3,1],lb=['วิกฤต','เฝ้าระวัง','ปกติ','ไม่ทราบสถานะ']; for(var i=0;i<g.length;i++){ d.innerHTML+='<i style="background:'+getWaterlevelColor(g[i])+'"></i> '+lb[i]+'<br>'; } return d; };
+fetch('https://api-v3.thaiwater.net/api/v1/thaiwater30/public/waterlevel_load')
+  .then(r=>{if(!r.ok) throw new Error(r.status); return r.json();})
+  .then(d=>{
+    var dataset = d && d.waterlevel_data && d.waterlevel_data.data ? d.waterlevel_data.data : (d && d.data ? d.data : null);
+    if(dataset){
+      dataset.forEach(it=>{
+        var pn=it.geocode&&it.geocode.province_name&&it.geocode.province_name.th;
+        if(pn==='เชียงราย'){
+          var lat=it.station&&it.station.tele_station_lat, lon=it.station&&it.station.tele_station_long;
+          if(lat&&lon){
+            var ic=L.divIcon({className:'custom-icon',html:`<div class="rainfall-icon" style="background-color:${getWaterlevelColor(it.situation_level)};width:50px;height:50px;line-height:50px;font-size:14px;color:#fff;">${(it.waterlevel_msl)?parseFloat(it.waterlevel_msl).toFixed(2):'-'}</div>`,iconSize:[50,50],iconAnchor:[25,25],popupAnchor:[0,-25]});
+            var m=L.marker([lat,lon],{icon:ic}).bindPopup(createWaterlevelPopup(it)); waterlevelLayer.addLayer(m);
+          }
+        }
+      });
+    }
+  })
+  .catch(e=>console.error('waterlevel fetch error',e));
+
+map.on('overlayadd',e=>{ if(e.layer===rainfallLayer) rainfallLegend.addTo(map); if(e.layer===waterlevelLayer) waterlevelLegend.addTo(map); });
+map.on('overlayremove',e=>{ if(rainfallLegend._map&&e.layer===rainfallLayer) map.removeControl(rainfallLegend); if(waterlevelLegend._map&&e.layer===waterlevelLayer) map.removeControl(waterlevelLegend); });
+
+// ================== เข้าข้อมูล json (add) ==================
+const restaurantsLayer = L.layerGroup();   // ชั้นข้อมูลร้านอาหาร
+const restaurantMarkers = [];              // เก็บ marker ไว้เปิด popup/ซูม
+let RESTAURANT_ITEMS = [];                 // เก็บรายการชื่อ/พิกัดสำหรับทำกล่องรายชื่อ
+
+// ไอคอนร้านอาหาร
+const restaurantIcon = L.icon({
+  iconUrl: 'icon/ร้านอาหาร.png',
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -28]
+});
+
+// กล่องรายชื่อร้าน (สไตล์เลเจนด์) — เปลี่ยนตำแหน่งเป็น 'bottomleft'
+const restaurantsLegend = L.control({ position: 'bottomleft' });
+restaurantsLegend.onAdd = function () {
+  const d = L.DomUtil.create('div', 'info legend');
+  d.style.maxWidth = '260px';
+  d.style.maxHeight = '240px';
+  d.style.overflow = 'auto';
+  d.style.cursor = 'default';
+  d.innerHTML =
+    `<h4 style="margin-top:0">ร้านอาหารเชียงราย</h4>` +
+    `<ul id="rest-list" style="list-style:none;padding-left:0;margin:6px 0;">` +
+    RESTAURANT_ITEMS.map((it, i) =>
+      `<li data-i="${i}" style="padding:4px 6px;border-radius:6px;margin-bottom:4px;">
+         <span style="font-weight:600">${i + 1}. ${escapeHtml(it.name || 'ร้านอาหาร')}</span>
+         <br><small style="color:#666">Lat: ${it.lat.toFixed(6)}, Lng: ${it.lon.toFixed(6)}</small>
+       </li>`).join('') +
+    `</ul>
+     <small style="color:#666">คลิกชื่อร้านเพื่อซูมและเปิดป๊อปอัพ</small>`;
+
+  L.DomEvent.disableClickPropagation(d);
+  L.DomEvent.disableScrollPropagation(d);
+
+  // คลิกชื่อร้าน → ซูม & เปิด popup
+  setTimeout(() => {
+    const ul = d.querySelector('#rest-list');
+    if (!ul) return;
+    ul.querySelectorAll('li').forEach(li => {
+      li.style.cursor = 'pointer';
+      li.addEventListener('click', () => {
+        const idx = +li.getAttribute('data-i');
+        const mk = restaurantMarkers[idx];
+        if (mk) {
+          map.setView(mk.getLatLng(), 17, { animate: true });
+          mk.openPopup();
+        }
+      });
+      li.addEventListener('mouseenter', () => li.style.background = '#f1f5f9');
+      li.addEventListener('mouseleave', () => li.style.background = '');
+    });
+  }, 0);
+
+  return d;
+};
+
+// แสดง/ซ่อนกล่องรายชื่อเมื่อเปิด/ปิดเลเยอร์จาก Layer Control
+map.on('overlayadd', e => { if (e.layer === restaurantsLayer) restaurantsLegend.addTo(map); });
+map.on('overlayremove', e => {
+  if (e.layer === restaurantsLayer && restaurantsLegend._map) map.removeControl(restaurantsLegend);
+});
+
+// ฟังก์ชัน popup รายละเอียด (ถ้าอยากใช้ที่ marker)
+function restaurantPopup(r, lat, lon) {
+  const name = r.name || r.title || 'ร้านอาหาร';
+  const desc = r.specialty || r.description || '';
+  const addr = r.address || '';
+  const phone = r.phone || '';
+  const notes = r.notes || '';
+  return ` 
+    <div>
+      <b>${escapeHtml(name)}</b><br>
+      ${desc ? `${escapeHtml(desc)}<br>` : ''} 
+      ${addr ? `<b>ที่อยู่:</b> ${escapeHtml(addr)}<br>` : ''} 
+      ${phone ? `<b>โทร:</b> ${escapeHtml(phone)}<br>` : ''} 
+      ${notes ? `<b>หมายเหตุ:</b> ${escapeHtml(notes)}<br>` : ''} 
+      <small>Lat: ${(+lat).toFixed(6)}, Lng: ${(+lon).toFixed(6)}</small> 
+    </div>
+  `;
+}
+
+// แปลง/เพิ่มลงแผนที่ (รองรับ GeoJSON)
+function addRestaurantsToMap(data) {
+  restaurantsLayer.clearLayers(); // เคลียร์ข้อมูลร้านอาหารเก่า
+  restaurantMarkers.length = 0; // เคลียร์ตัวแปรเก็บ markers
+  RESTAURANT_ITEMS = []; // เคลียร์ข้อมูลร้านทั้งหมด
+
+  const bounds = []; // ใช้เก็บพิกัดของร้านอาหารทั้งหมดเพื่อฟิตแผนที่
+
+  // ตรวจสอบว่าเป็น GeoJSON FeatureCollection หรือไม่
+  if (data && data.type === 'FeatureCollection' && Array.isArray(data.features)) {
+    data.features.forEach(f => {
+      const lat = f.geometry.coordinates[1];  // Lat อยู่ที่ index 1 ของ coordinates
+      const lon = f.geometry.coordinates[0];  // Lon อยู่ที่ index 0 ของ coordinates
+
+      // ตรวจสอบพิกัด
+      if (!isFinite(lat) || !isFinite(lon)) {
+        console.warn(`พิกัดไม่ถูกต้องสำหรับร้าน: ${f.properties.name}`);
+        return; // ถ้าพิกัดไม่ถูกต้อง ข้ามไป
+      }
+
+      const name = f.properties.name || 'ร้านอาหาร';
+
+      // สร้าง Marker สำหรับร้าน
+      const m = L.marker([lat, lon], { icon: restaurantIcon })
+        .bindPopup(restaurantPopup(f.properties, lat, lon))
+        .on('click', () => map.setView([lat, lon], 17, { animate: true }));
+
+      // เพิ่ม marker ลงใน layer
+      restaurantsLayer.addLayer(m);
+      restaurantMarkers.push(m);
+      RESTAURANT_ITEMS.push({ name, lat, lon }); // เก็บข้อมูลร้านไว้
+      bounds.push([lat, lon]); // เก็บพิกัดสำหรับฟิตแผนที่
+    });
+  }
+
+  if (bounds.length) {
+    try {
+      map.fitBounds(bounds); // ฟิตแผนที่ให้แสดงร้านทั้งหมด
+    } catch (e) {
+      console.error("เกิดข้อผิดพลาดในการฟิตแผนที่", e);
+    }
+  }
+}
+
+// ยูทิล escape
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+function escapeAttr(str) {
+  return String(str ?? '').replace(/"/g, '&quot;');
+}
+
+// โหลดไฟล์ GeoJSON ภาษาไทย (กันแคชด้วยพารามิเตอร์เวลา)
+fetch(`data/chiang_rai_restaurants.json?v=${Date.now()}`)
+  .then(r => { 
+    if (!r.ok) throw new Error(r.status); 
+    return r.json(); 
+  })
+  .then(data => {
+    console.log("ข้อมูลร้านอาหารที่โหลดมา:", data); // ตรวจสอบข้อมูลที่โหลดมา
+    addRestaurantsToMap(data);
+  })
+  .catch(err => console.error('โหลด data/chiang_rai_restaurants.json ไม่สำเร็จ:', err));
+
+/* ============== Controls ============== */
+function toggleMenu(){ document.getElementById("sideMenu").classList.toggle("active"); document.getElementById("overlay").classList.toggle("active"); }
+function logout(){ alert("You have logged out!"); window.location.href="login.html"; }
+
+var baseLayers={
+  "Google_map":google_map,"Openstreetmap":openstreetmap,"EsriWorldStreetMap":EsriWorldStreetMap,
+  "OpenTopoMap":OpenTopoMap,"Esri_WorldImagery":Esri_WorldImagery,"Google Hybrid":googleHybrid
+};
+var overlayer={
+  "marker เชียงราย":marker,"ขอบเขตตำบลเชียงราย JSON":ThaiProvJSON,"ขอบเขต 9 ตำบล JSON SQL":jsonProv,"amp cri":amp_cri,
+  "road_cri":road_cri,"ปริมาณน้ำฝน 24 ชม.จังหวัดเชียงราย":rainfallLayer,"ระดับน้ำจังหวัดเชียงราย":waterlevelLayer,"ร้านอาหารเชียงราย": restaurantsLayer
+};
+L.control.layers(baseLayers,overlayer).addTo(map);
+</script>
+</body>  
+</html>

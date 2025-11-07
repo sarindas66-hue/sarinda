@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>mini project</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-image: url('images/redturtle014.jpg'); /* 🔹 เพิ่มพื้นหลัง */
+      background-size: cover; /* ให้ภาพเต็มหน้าจอ */
+      background-position: center; /* จัดให้อยู่ตรงกลาง */
+      background-repeat: no-repeat; /* ไม่ซ้ำภาพ */
+      background-attachment: fixed; /* พื้นหลังคงที่ตอนเลื่อน */
+      color: #1D1D1E; /* Black */
+      overflow-x: hidden;
+    }
+
+    /* 🔹 Top Bar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1D1D1E; /* Black */
+      color: #F9F7F5; /* Off White */
+      border-bottom: 2px solid #C6953F; /* Golden Yellow */
+      padding: 10px 20px;
+      position: relative;
+      z-index: 1001;
+    }
+
+    .menu-btn {
+      font-size: 24px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: #F9F7F5;
+    }
+
+    .logout-btn {
+      background: #A31E21; /* Deep Red */
+      color: #F9F7F5;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: #620A1A; /* Crimson Red */
+    }
+
+    /* 🔹 Side Menu */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 240px;
+      height: 100%;
+      background: #C6953F; /* Golden Yellow */
+      box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+      padding: 20px;
+      transition: left 0.3s ease;
+      z-index: 1000;
+      color: #F9F7F5;
+    }
+
+    .side-menu.open { left: 0; }
+
+    .side-menu h3 {
+      margin-top: 0;
+      color: #F9F7F5;
+      margin-bottom: 20px;
+    }
+
+    /* ✅ ปรับ hover ให้เหมือนในภาพ */
+    .side-menu a {
+      display: block;
+      padding: 10px 12px;
+      color: #F9F7F5;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      transition: background .2s ease, color .2s ease, transform .1s ease;
+      border-radius: 6px;         
+      margin: 6px 4px;            
+    }
+
+    .side-menu a:hover,
+    .side-menu a:focus-visible {
+      background: #E9E3D6;        
+      color: #1D1D1E;             
+      transform: translateY(-1px);
+    }
+
+    /* 🔹 Hero Section */
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 60px 10%;
+      max-width: 1000px;
+      margin: 0 auto;
+      border-radius: 20px;
+    }
+
+    .hero-text { max-width: 55%; }
+
+    .hero-text h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      color: #F9F7F5; /* เปลี่ยนให้ดูชัดบนพื้นหลัง */
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+    }
+
+    .hero-text p {
+      font-size: 1.1rem;
+      margin-bottom: 25px;
+      color: #F5E1D0; /* สีอ่อน อ่านง่ายบนภาพ */
+      text-shadow: 1px 1px 5px rgba(0,0,0,0.6);
+    }
+
+    /* 🔹 Hero Image */
+    .hero-img img {
+      border-radius: 15px;
+      max-width: 200px;  /* Adjust the size of the image */
+      height: auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    @media (max-width: 768px) {
+      .hero { flex-direction: column; text-align: center; }
+      .hero-text { max-width: 100%; }
+      .hero-img img { max-width: 250px; margin-top: 20px; }
+    }
+
+    /* 🔹 Section (Move personal information up) */
+    .section {
+      padding: 40px 10%; /* Reduced padding to move it up */
+    }
+
+    .section h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: #F9F7F5;
+      text-align: center;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+    }
+
+    /* 🔹 Slider */
+    .slider-container {
+      position: relative;
+      overflow: hidden;
+      max-width: 1000px;
+      margin: 0 auto;
+      border-radius: 15px;
+      background: rgba(0,0,0,0.8);
+      padding: 20px;
+    }
+
+    .slider { display: flex; width: calc(250px * 12); animation: slideLoop 24s linear infinite; }
+    .slide { flex: 0 0 250px; margin-right: 20px; }
+
+    .slide img {
+      width: 250px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 3px solid #A31E21;
+    }
+
+    @keyframes slideLoop {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* 🔹 Footer */
+    .footer {
+      background: rgba(29,29,30,0.95);
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9rem;
+      color: #F9F7F5;
+      border-top: 3px solid #A31E21;
+    }
+
+    /* 🔹 Overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      z-index: 999;
+    }
+    .overlay.show { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- 🔹 Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <h3>Menu</h3>
+    <a href="home.html">Home</a>
+    <a href="profile.html">Profile</a>
+    <a href="projects.html">Projects</a>
+  </div>
+
+  <!-- 🔹 Overlay -->
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+  <!-- 🔹 Top Bar -->
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleMenu()">&#9776;</button>
+    <button class="logout-btn" onclick="logout()">log out</button>
+  </div>
+
+  <!-- 🔹 Hero -->
+  <div class="hero">
+    <div class="hero-text">
+      <h1>Home</h1>
+      <p>Visualize Chiang Rai’s data and beauty with our GIS system.</p>
+    </div>
+    <div class="hero-img">
+      <img src="images/ใบชา.png" alt="Hero Image">
+    </div>
+  </div>
+
+  <!-- 🔹 Slider Section -->
+  <div class="section">
+    <h2>personal information</h2>
+    <div class="slider-container">
+      <div class="slider">
+        <div class="slide"><img src="images/เก็บชา.jpg" alt="1"></div>
+        <div class="slide"><img src="images/ผ้าไท.jpg" alt="2"></div>
+        <div class="slide"><img src="images/จักสาน.jpg" alt="3"></div>
+        <div class="slide"><img src="images/ทอผ้า.jpg" alt="4"></div>
+
+        <!-- ทำซ้ำเพื่อให้เลื่อนวนลูป -->
+        <div class="slide"><img src="images/เก็บชา.jpg" alt="1"></div>
+        <div class="slide"><img src="images/ผ้าไท.jpg" alt="2"></div>
+        <div class="slide"><img src="images/จักสาน.jpg" alt="3"></div>
+        <div class="slide"><img src="images/ทอผ้า.jpg" alt="4"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔹 Footer -->
+  <div class="footer">
+    © 2025 
+  </div>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('overlay');
+      menu.classList.toggle('open');
+      overlay.classList.toggle('show');
+    }
+
+    function logout() {
+      alert("ออกจากระบบเรียบร้อย!");
+      window.location.href = "login.html";
+    }
+  </script>
+
+</body>
+</html>

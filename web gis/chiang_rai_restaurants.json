@@ -1,0 +1,292 @@
+{
+  "type": "FeatureCollection",
+  "name": "ร้านอาหารดังจังหวัดเชียงราย",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Barrab Restaurant",
+        "address": "897/60 Phaholyothin Rd, Wiang, Mueang Chiang Rai 57000, Thailand",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "อาหารเหนือ–Hung Lay Curry, Pad Thai",
+        "notes": "ร้านเล็ก-บรรยากาศอบอุ่น"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8323, 19.9104]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Tum Ka Yum Cafe",
+        "address": "Uttarakit, Tambon Rop Wiang, Mueang Chiang Rai 57000",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "ส้มตำ, หมู/ไก่/กุ้ง",
+        "notes": "ร้านแนะนำสำหรับอาหารไทยรสจัด"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8362, 19.9075]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Chivit Thamma Da Coffee House, Bistro & Bar",
+        "address": "179 Moo 2, Bannrongseartean Soi 3, Mueang Chiang Rai District 57100",
+        "phone": "+66 (0)81-984-2925",
+        "specialty": "ข้าวซอย, สลัดแซลมอนรมควัน, ขนมเค้ก",
+        "notes": "ริมแม่น้ำ Kok River – บรรยากาศดี"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8197, 19.9185]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Khao Soi Thao Gae Ek",
+        "address": "1/14 Trairat Rd, Tambon Wiang, Mueang Chiang Rai District 57100",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "ข้าวซอยไก่, ข้าวซอยหมูตุ๋น, น้ำเงี้ยว",
+        "notes": "ร้านดังด้านข้าวซอยในเชียงราย"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8304, 19.9067]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kunda Vegan Burger Cafe",
+        "address": "372 Trairat Rd, Tambon Wiang, Mueang Chiang Rai, Chiang Rai",
+        "phone": "+66 (0)82-886-6301",
+        "specialty": "เบอร์เกอร์วีแกน, เค้กกลูเตน-ฟรี",
+        "notes": "ตัวเลือกดีสำหรับผู้ทานเจ/วีแกน"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8329, 19.9092]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Varee Fine Casual Dining",
+        "address": "286/1 Moo 2 Bannrongseartean Soi 5 Rim Kok, Mueang Chiang Rai 57100",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "อาหารไทย-ล้านนาแบบฟิวชั่น, ข้าวซอยซี่โครงหมู",
+        "notes": "ริมแม่น้ำ บรรยากาศหรูขึ้น"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8179, 19.9179]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Latitude 19 at Le Méridien Chiang Rai Resort",
+        "address": "221/2 Moo 20 Kwaewai Road, Chiang Rai 57000",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "อาหารว่าง, ค็อกเทล, บาร์ริมแม่น้ำ",
+        "notes": "เหมาะสำหรับนั่งชิลยามเย็น"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8269, 19.9187]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Surf And Turf",
+        "address": "1025/5 Jetyod Road, Chiang Rai 57000",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "สเต๊ก, เบอร์เกอร์วากิว, ชีสเค้ก",
+        "notes": "บรรยากาศ Casual Western"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8373, 19.9069]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "The Peak Wine & Grill",
+        "address": "1129 Kraisorasit Rd, The Riverie by Katathani, Chiang Rai 57000",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "กริลล์สเต๊ก, ซีฟู้ด, ไวน์พรีเมียม",
+        "notes": "วิวชั้นดาดฟ้า – เหมาะสำหรับโอกาสพิเศษ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8324, 19.9152]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Ribs & Co.",
+        "address": "590/2 Baanpa Pragarn Road, Chiang Rai 57000",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "บาร์บีคิว, ซี่โครงหมู, เบอร์เกอร์",
+        "notes": "อาหารแนวบาร์บีคิวสไตล์อเมริกัน"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8312, 19.9083]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Boonsita Vegetarian Restaurant",
+        "address": "Satharn Payabarn Road, Tambon Rop Wiang, Mueang Chiang Rai District Chiang Rai 57000",
+        "phone": "+66 (0)86-116-4575",
+        "specialty": "อาหารเจ/มังสวิรัติ, เย็นตาโฟเห็ด",
+        "notes": "ร้านดีสำหรับผู้ทานมังสวิรัติ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8183, 19.9085]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hungry Wolf’s Steak & Ale House",
+        "address": "1131 Kraisorasit Road, Wiang, Chiang Rai",
+        "phone": "+66 (0)53-711-091",
+        "specialty": "สเต๊ก, พิซซ่า, เบอร์เกอร์",
+        "notes": "เลือกได้สำหรับอาหารฝรั่งคุณภาพ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8322, 19.9126]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Salungkham Restaurant",
+        "address": "884 Phaholyothin Rd, T. Vient, A. Muang, Chiang Rai",
+        "phone": "+66 (0)53-717-192",
+        "specialty": "อาหารเหนือดั้งเดิม",
+        "notes": "ร้านเก่าแก่ในเชียงราย"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8345, 19.9132]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Crêpe Corner Chiangrai",
+        "address": "Wiang, Chiang Rai Province, Thailand",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "เครป, อเมริกันเบรกฟาสต์, ขนมยุโรป",
+        "notes": "ร้านขนม/กาแฟบรรยากาศดี"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.835, 19.9124]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "La Ola Chiang Rai",
+        "address": "Wiang, Chiang Rai Province, Thailand",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "สเปนแทปาส, พิซซ่า",
+        "notes": "อาหารเมดิเตอร์เรเนียนในเชียงราย"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8367, 19.9118]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Por Jai Restaurant",
+        "address": "29 Cr … / 29/ ???, Chiang Rai",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "ข้าวซอย, หมูปิ้ง",
+        "notes": "ร้านแบบพื้นเมือง รสจัด"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8394, 19.9159]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Larb Sanam Keela",
+        "address": "Chiang Rai Province",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "ลาบหมู, อาหารเหนือ",
+        "notes": "หนึ่งในร้านแนะนำสำหรับอาหารท้องถิ่น"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8321, 19.9164]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Lu Lam Restaurant",
+        "address": "Chiang Rai Province",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "อาหารเหนือ-วิวแม่น้ำ",
+        "notes": "บรรยากาศดี วิวแม่น้ำ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8334, 19.9172]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "The Wanderer Cafe",
+        "address": "537/1 Mueang Chiang Rai District, Chiang Rai 57100",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "เบรกฟาสต์, แพนเค้ก, กาแฟ",
+        "notes": "คาเฟ่สงบกลางธรรมชาติ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8382, 19.915]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Khao Soi Restaurant (ชื่อทั่วไป)",
+        "address": "Prasopsook Rd, Tambon Wiang, Mueang Chiang Rai District 57000",
+        "phone": "+66 (0)53-XXX-XXX",
+        "specialty": "Pad Thai, แกง, ข้าวซอย",
+        "notes": "ร้านราคาย่อมเยา แนะนำโดยนักท่องเที่ยว"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [99.8296, 19.91]
+      }
+    }
+  ]
+}

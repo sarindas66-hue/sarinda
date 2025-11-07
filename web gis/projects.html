@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Project | Mini Project</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ====== พาเลตสีจากภาพ ====== */
+    /* --ink: #1D1D1E, --crimson: #620A1A, --deepred: #A31E21
+       --gold: #C6953F, --beige: #E9E3D6, --offwhite: #F9F7F5 */
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-image: url('images/redturtle014.jpg'); /* 🔹 เพิ่มพื้นหลัง */
+      background-size: cover; /* ให้ภาพเต็มหน้าจอ */
+      background-position: center; /* จัดให้อยู่ตรงกลาง */
+      background-repeat: no-repeat; /* ไม่ซ้ำภาพ */
+      background-attachment: fixed; /* พื้นหลังคงที่ตอนเลื่อน */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 🔹 Topbar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1D1D1E;
+      border-bottom: 1px solid #C6953F;
+      color: #F9F7F5;
+      padding: 10px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 1001; /* อยู่เหนือ side-menu */
+    }
+
+    .menu-btn {
+      font-size: 22px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 6px;
+      color: #F9F7F5;
+    }
+
+    .page-title { font-weight: 700; font-size: 18px; }
+
+    .logout-btn {
+      background: #A31E21;
+      color: #F9F7F5;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .logout-btn:hover { background: #620A1A; }
+
+    /* 🔹 Side Menu */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -260px;                /* ซ่อนเมนูเริ่มต้น */
+      width: 240px;
+      height: 100%;
+      background: #C6953F;         /* ทองอุ่น */
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      transition: left 0.3s ease;
+      z-index: 999;                /* อยู่หลัง topbar */
+      margin-top: 5px;             /* ให้เห็นขอบทองใต้แถบดำ */
+    }
+    .side-menu.open { left: 0; }
+
+    .side-toggle {
+      font-size: 26px;
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0 0 10px 0;
+      cursor: pointer;
+      line-height: 1;
+      color: #F9F7F5;
+    }
+
+    /* ====== รายการเมนู (แก้ไม่ให้ล้นขอบ) ====== */
+    .side-menu a {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;      /* ให้ padding รวมในความกว้าง */
+      padding: 12px 16px;          /* ระยะด้านในของกล่อง */
+      margin: 12px 0;              /* เว้นบนล่างเท่านั้น ไม่แตะซ้าย-ขวา */
+      color: #F9F7F5;
+      text-decoration: none;
+      border-radius: 10px;         /* มุมโค้ง */
+      position: relative;
+      transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+    }
+
+    /* เส้นแบ่งบาง ๆ โค้งมน เหมือนภาพ */
+    .side-menu a:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: -8px;                /* ระยะห่างใต้ข้อความ */
+      height: 2px;
+      background: rgba(249,247,245,0.35);
+      border-radius: 8px;
+    }
+
+    /* Hover: กล่องเบจพอดีกับขอบเมนู และซ่อนเส้นแบ่ง */
+    .side-menu a:hover,
+    .side-menu a:focus-visible {
+      background: #E9E3D6;         /* เบจอ่อน */
+      color: #1D1D1E;              /* ตัวอักษรดำ */
+      box-shadow: 0 1px 0 rgba(0,0,0,0.08) inset;
+    }
+    .side-menu a:hover::after,
+    .side-menu a:focus-visible::after { opacity: 0; }
+
+    /* 🔹 เนื้อหา */
+    .main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .container {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .card {
+      position: relative;
+      width: 300px;
+      height: 200px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .card:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+
+    .card img { width: 100%; height: 100%; object-fit: cover; }
+
+    .card .label {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      font-size: 1.2em;
+      padding: 10px 0;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 700px) {
+      .card { width: 90%; height: 180px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔹 Topbar -->
+  <header class="topbar">
+    <button class="menu-btn" id="menuToggle" aria-label="Toggle menu">☰</button>
+    <h2 style="margin:0; font-weight:600;">Project</h2>
+    <button class="logout-btn" onclick="window.location.href='login.html'">Log Out</button>
+  </header>
+
+  <!-- 🔹 Side Menu -->
+  <nav class="side-menu" id="sideMenu" aria-label="Side menu">
+    <button class="side-toggle" id="sideHamburger" aria-label="Close menu">☰</button>
+    <a href="home.html">Home</a>
+    <a href="profile.html">Profile</a>
+    <a href="projects.html">Projects</a>
+  </nav>
+
+  <!-- 🔹 Main Content -->
+  <main class="main">
+    <div class="container">
+      <a href="map cri2.html" class="card">
+        <img src="images/ไร่ชา.jpg" alt="Map Page">
+        <div class="label"> Map </div>
+      </a>
+
+      <a href="สำรอง project.html" class="card">
+        <img src="images/ผ้าไท.jpg" alt="AGI Page">
+        <div class="label"> AGI </div>
+      </a>
+    </div>
+  </main>
+
+  <!-- 🔹 Script เปิด/ปิดเมนู -->
+  <script>
+    const menuToggle = document.getElementById('menuToggle');
+    const sideMenu = document.getElementById('sideMenu');
+    const sideHamburger = document.getElementById('sideHamburger');
+
+    // เปิด/ปิดเมนูด้วยปุ่มบน Topbar
+    menuToggle.addEventListener('click', () => {
+      sideMenu.classList.toggle('open');
+    });
+
+    // คลิก ☰ ภายในเมนู -> ปิดเมนู
+    sideHamburger.addEventListener('click', () => {
+      sideMenu.classList.remove('open');
+    });
+
+    // ปิดเมนูเมื่อคลิกนอกเมนู
+    document.addEventListener('click', (e) => {
+      if (!sideMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+        sideMenu.classList.remove('open');
+      }
+    });
+
+    // ปิดเมนูด้วยคีย์ Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') sideMenu.classList.remove('open');
+    });
+
+    // กดลิงก์ในเมนูแล้วปิดเมนู
+    sideMenu.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => sideMenu.classList.remove('open'));
+    });
+  </script>
+
+</body>
+</html>

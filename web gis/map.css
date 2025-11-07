@@ -1,0 +1,262 @@
+/* ---- พาเลตจากภาพ ----
+   ink:        #1D1D1E
+   crimson:    #620A1A
+   deepred:    #A31E21
+   gold:       #C6953F
+   beige:      #E9E3D6
+   offwhite:   #F9F7F5
+-------------------------------- */
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background-image: url('images/redturtle014.jpg');  /* 🔹 เพิ่มพื้นหลัง */
+  background-size: cover;       /* ให้ภาพเต็มหน้าจอ */
+  background-position: center;  /* จัดให้อยู่ตรงกลาง */
+  background-repeat: no-repeat; /* ไม่ซ้ำภาพ */
+  background-attachment: fixed; /* พื้นหลังคงที่ตอนเลื่อน */
+  overflow-x: hidden;
+  color: #1D1D1E;               /* ink */
+}
+
+/* ========== TOP BAR ========== */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #1D1D1E;       /* ink */
+  padding: 12px 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  color: #F9F7F5;                  /* offwhite */
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #F9F7F5;
+}
+
+.logout-btn {
+  background-color: #A31E21;       /* deepred */
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #F9F7F5;
+}
+.logout-btn:hover {
+  background-color: #620A1A;       /* crimson */
+}
+
+/* ========== SIDE MENU ========== */
+.side-menu {
+  position: fixed;
+  left: -220px;
+  top: 0;
+  width: 200px;                    /* ลดความกว้าง */
+  height: 100%;
+  background-color: #C6953F;       /* gold */
+  box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+  transition: left 0.3s ease;
+  z-index: 1000;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.side-menu.active,
+.side-menu.open {
+  left: 0;
+}
+
+.side-menu h3 {
+  margin: 16px;
+  color: #F9F7F5;
+}
+
+.side-menu a {
+  display: block;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #F9F7F5;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(249,247,245,0.3);
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.side-menu a:last-of-type {
+  border-bottom: none;
+}
+
+.side-menu a:hover {
+  background-color: #E9E3D6;
+  color: #5C4033;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* แถบทองด้านซ้าย */
+.side-menu-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 20px;
+  background-color: #C6953F;
+  z-index: 999;
+}
+
+/* ========== OVERLAY ========== */
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  z-index: 950;
+}
+.overlay.active,
+.overlay.show {
+  display: block;
+}
+
+/* ========== MAP AREA ========== */
+#map {
+  height: 500px;
+  width: 70%;
+  margin: 100px auto 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  background: #ccc;
+}
+
+/* ========== LEGEND / INFO ========== */
+.legend {
+  line-height: 20px;
+  color: #1D1D1E;
+}
+.legend i {
+  width: 18px;
+  height: 18px;
+  float: left;
+  margin-right: 8px;
+  opacity: 0.7;
+}
+.info {
+  padding: 6px 8px;
+  background: rgba(249,247,245,0.9);
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  border-radius: 5px;
+}
+
+/* ========== INPUT ========== */
+#tour-q {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #C6953F;
+  border-radius: 6px;
+  outline: none;
+  box-sizing: border-box;
+  background: #F9F7F5;
+  color: #1D1D1E;
+}
+
+/* ========== ปุ่มค้นหาและล้าง ========== */
+#tour-btn {
+  background-color: #620A1A;  /* crimson */
+  color: #F9F7F5;  /* offwhite */
+  border-radius: 6px;
+  padding: 6px 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+#tour-btn:hover {
+  background-color: #A31E21; /* deepred */
+}
+
+#tour-clear {
+  background-color: #ddd;
+  color: #1D1D1E;
+  border-radius: 6px;
+  padding: 6px 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+#tour-clear:hover {
+  background-color: #E9E3D6; /* beige */
+}
+
+/* ========== กล่องผลลัพธ์การค้นหา ========== */
+#tour-res {
+  max-height: 220px;
+  overflow: auto;
+  margin-top: 8px;
+  border-top: 1px solid #eee;
+  padding-top: 6px;
+  background-color: #F9F7F5; /* offwhite */
+  color: #1D1D1E;
+  font-size: 14px;
+}
+
+/* ========== รายการสถานที่ ========== */
+.tour-item {
+  padding: 6px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.tour-item:hover {
+  background-color: #E9E3D6;  /* beige */
+  color: #5C4033;
+}
+
+/* ปริมาณน้ำฝน */
+.rainfall-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #620A1A;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: #F9F7F5;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ระดับน้ำ */
+.waterlevel-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #A31E21;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  color: #F9F7F5;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+}
+
+.rainfall-icon:hover,
+.waterlevel-icon:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease-in-out;
+}

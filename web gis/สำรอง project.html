@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Map AGI</title>
+  <link rel="stylesheet" href="agi.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.mouseposition/1.0.1/L.Control.MousePosition.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.mouseposition/1.0.1/L.Control.MousePosition.min.js"></script>
+</head>
+<body>
+  <div class="side-menu" id="sideMenu">
+    <button class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+    <a href="home.html" style="color:#F9F7F5; text-decoration:none;">Home</a>
+    <a href="profile.html" style="color:#F9F7F5; text-decoration:none;">Profile</a>
+    <a href="projects.html" style="color:#F9F7F5; text-decoration:none;">Projects</a>
+  </div>
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+  <div class="topbar">
+    <button class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+    <h2 style="margin:0;">Map AGI</h2>
+    <button class="logout-btn" onclick="logout()">Log Out</button>
+  </div>
+
+  <div class="content">
+    <h3>Faculty of Agriculture Student Information</h3>
+    <div class="filter-box">
+      <label>คณะ:</label>
+      <select id="facultySelect"><option value="">-- เลือกคณะ --</option></select>
+      <label>สาขา:</label>
+      <select id="majorSelect"><option value="">-- เลือกสาขา --</option></select>
+      <label>ปี:</label>
+      <select id="yearSelect">
+        <option value="">-- เลือกชั้นปี --</option>
+        <option value="ปี 1">ปี 1</option>
+        <option value="ปี 2">ปี 2</option>
+        <option value="ปี 3">ปี 3</option>
+        <option value="ปี 4">ปี 4</option>
+      </select>
+      <button class="confirm-btn" onclick="applySelection()">ตกลง</button>
+    </div>
+
+    <div class="result-list" id="resultList"></div>
+    <div id="map"></div>
+  </div>
+
+  <script>
+    // ===== พื้นฐานแผนที่ =====
+    const map = L.map('map').setView([16.744,100.191], 15);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18, attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // mouse position
+    (function(){
+      const ctl = L.control({position:'bottomleft'});
+      ctl.onAdd=function(){
+        const d=L.DomUtil.create('div','leaflet-control-mouseposition');
+        d.style.background='rgba(255,255,255,0.8)'; d.style.padding='4px 8px';
+        d.innerHTML='Lat: -, Lng: -'; this._div=d; return d;
+      };
+      ctl.update=function(latlng){this._div.innerHTML=latlng?`Lat: ${latlng.lat.toFixed(6)}, Lng: ${latlng.lng.toFixed(6)}`:'Lat: -, Lng: -';};
+      ctl.addTo(map);
+      map.on('mousemove',e=>ctl.update(e.latlng));
+      map.on('mouseout',()=>ctl.update(null));
+    })();
+
+    function toggleMenu(){
+      document.getElementById('sideMenu').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('show');
+    }
+    function logout(){alert("ออกจากระบบเรียบร้อย!");window.location.href="login.html";}
+
+    const API_URL = './data/agi.php';
+
+    let resultsLayer = L.layerGroup().addTo(map);
+    let AGI_DATA=[], AGI_FACULTY_SET=new Set(), AGI_MAP_BY_FACULTY={};
+    const MARKERS = new Map(); // key -> marker
+
+    // ===== fetch helper =====
+    async function safeFetchJSON(url){
+      const res = await fetch(url, {cache:'no-store'});
+      const text = await res.text();
+      let json;
+      try{ json = JSON.parse(text); }
+      catch(e){ throw new Error('Response is not valid JSON'); }
+      if(!res.ok || (json && json.ok === false)){
+        throw new Error(json && json.error ? json.error : 'Server returned error');
+      }
+      return json;
+    }
+
+    // ===== โหลดข้อมูลเติม dropdown (รวมทุกตาราง: agi64-agi67) =====
+    async function loadAgiData(){
+      try{
+        const data = await safeFetchJSON(API_URL); // ไม่ส่ง years -> รวมทุกเทเบิล
+        prepareDropdownData(data.items);
+      }catch(err){
+        alert('โหลดข้อมูลจาก agi.php ไม่ได้');
+        console.error(err);
+      }
+    }
+
+    function prepareDropdownData(items){
+      AGI_DATA = items; AGI_FACULTY_SET = new Set(); AGI_MAP_BY_FACULTY = {};
+      for(const r of AGI_DATA){
+        const f=(r.faculty||'').trim(), c=(r.curriculum||'').trim();
+        if(!f) continue;
+        AGI_FACULTY_SET.add(f);
+        if(!AGI_MAP_BY_FACULTY[f]) AGI_MAP_BY_FACULTY[f] = new Set();
+        if(c) AGI_MAP_BY_FACULTY[f].add(c);
+      }
+      fillFacultyDropdown();
+    }
+
+    function clearOptions(sel,ph){
+      sel.innerHTML=''; const o=document.createElement('option'); o.value=''; o.textContent=ph; sel.appendChild(o);
+    }
+
+    function fillFacultyDropdown(){
+      const s=document.getElementById('facultySelect');
+      clearOptions(s,'-- เลือกคณะ --');
+      [...AGI_FACULTY_SET].sort().forEach(f=>{ 
+        const o=document.createElement('option'); o.value=f; o.textContent=f; s.appendChild(o);
+      });
+      s.addEventListener('change',handleFacultyChange);
+      handleFacultyChange();
+    }
+
+    function handleFacultyChange(){
+      const f=document.getElementById('facultySelect').value.trim();
+      const s=document.getElementById('majorSelect');
+      clearOptions(s,'-- เลือกสาขา --');
+      if(!f || !AGI_MAP_BY_FACULTY[f]) return;
+      [...AGI_MAP_BY_FACULTY[f]].sort().forEach(m=>{ 
+        const o=document.createElement('option'); o.value=m; o.textContent=m; s.appendChild(o);
+      });
+    }
+
+    // ===== แมปปี -> พารามิเตอร์ years ของ agi.php =====
+    function mapYearToYearsParam(y){
+      switch(y){ 
+        case 'ปี 1': return '67'; // agi67
+        case 'ปี 2': return '66'; // agi66
+        case 'ปี 3': return '65'; // agi65
+        case 'ปี 4': return '64'; // agi64
+        default: return '';
+      }
+    }
+
+    async function fetchYearAndDraw(yearsParam, faculty, major){
+      const url = `${API_URL}?years=${encodeURIComponent(yearsParam)}&faculty=${encodeURIComponent(faculty)}&curriculum=${encodeURIComponent(major)}`;
+      const data = await safeFetchJSON(url);
+      drawResults(data.items || []);
+      displayResultList(data.items || []);
+    }
+
+    async function applySelection(){
+      const faculty = document.getElementById('facultySelect').value.trim();
+      const major   = document.getElementById('majorSelect').value.trim();
+      const year    = document.getElementById('yearSelect').value.trim();
+      if(!faculty || !major || !year){ alert('กรุณาเลือกคณะ สาขา และชั้นปีให้ครบ'); return; }
+      const yearsParam = mapYearToYearsParam(year);
+      await fetchYearAndDraw(yearsParam, faculty, major);
+    }
+
+    function displayResultList(rows) {
+      const resultList = document.getElementById('resultList');
+      resultList.innerHTML = '';
+      rows.sort((a, b) => (a.s_name || '').localeCompare(b.s_name || ''));
+      rows.forEach((row, index) => {
+        const div = document.createElement('div');
+        div.className = 'result-item';
+        div.textContent = `${index + 1}. ${row.s_name} - ${row.curriculum} - ${row.faculty}`;
+        const key = row.s_id || `${row.s_name}|${row.lat}|${row.long}`;
+        div.dataset.key = key;
+        div.addEventListener('click', () => {
+          const marker = MARKERS.get(key);
+          if (marker) {
+            const ll = marker.getLatLng();
+            map.setView(ll, Math.max(map.getZoom(), 14), { animate: true });
+            marker.openPopup();
+          } else if (Number.isFinite(Number(row.lat)) && Number.isFinite(Number(row.long))) {
+            const ll = [Number(row.lat), Number(row.long)];
+            map.setView(ll, Math.max(map.getZoom(), 14), { animate: true });
+          }
+        });
+        resultList.appendChild(div);
+      });
+    }
+
+    const normKey = s => (s||'').replace(/\(.*?\)/g,'').toLowerCase().replace(/\s+/g,'').replace(/[^\u0E00-\u0E7Fa-z0-9]/gi,'');
+
+    const ICON_PATHS = new Map([ 
+      [normKey('ทรัพยากรธรรมชาติและสิ่งแวดล้อม'), 'icon/Point2.png'],
+      [normKey('ภูมิศาสตร์'), 'icon/Point.png'],
+      [normKey('วิทยาศาสตร์การประมง'), 'icon/Point3.png'],
+      [normKey('วิทยาศาสตร์การเกษตร'), 'icon/Point4.png'],
+      [normKey('วิทยาศาสตร์และเทคโนโลยีการอาหาร'), 'icon/Point5.png'],
+      [normKey('สัตวศาสตร์และเทคโนโลยีอาหารสัตว์'), 'icon/Point6.png'],
+      [normKey('เกษตรแม่นยำ'), 'icon/Point7.png'],
+      [normKey('เทคโนโลยีชีวภาพทางการเกษตร'), 'icon/Point8.png']
+    ]);
+
+    const DEFAULT_ICON_URL = 'icon/Point.png';
+
+    const ICON_CACHE = new Map();
+    function getIcon(url){
+      if(!ICON_CACHE.has(url)){
+        ICON_CACHE.set(url, L.icon({ iconUrl:url, iconSize:[36,36], iconAnchor:[18,36], popupAnchor:[0,-34] }));
+      }
+      return ICON_CACHE.get(url);
+    }
+
+    function drawResults(rows){
+      resultsLayer.clearLayers(); MARKERS.clear();
+      if(!rows || rows.length===0){ alert('ไม่พบข้อมูลที่ตรงกับเงื่อนไข'); return; }
+
+      const features = rows.map(r=> {
+        const lat = Number(r.lat), lng = Number(r.long);
+        const okNum = Number.isFinite(lat) && Number.isFinite(lng);
+        const okRange = lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+        return okNum && okRange ? { type: 'Feature', geometry: { type: 'Point', coordinates: [lng, lat] }, properties: r } : null;
+      }).filter(Boolean);
+
+      if(features.length === 0) { alert('มีข้อมูล แต่พิกัดไม่สมบูรณ์/อยู่นอกช่วงพิกัดโลก'); return; }
+
+      const layer = L.geoJSON({ type: 'FeatureCollection', features }, {
+        pointToLayer: (f, latlng) => {
+          const cur = (f.properties.curriculum || '').trim();
+          const key = normKey(cur);
+          const iconUrl = ICON_PATHS.get(key) || DEFAULT_ICON_URL;
+          return L.marker(latlng, { icon: getIcon(iconUrl) });
+        },
+        onEachFeature: (f, l) => {
+          const p = f.properties || {};
+          l.bindPopup(`<b>${p.s_name ?? '-'}</b><br>${p.curriculum ?? '-'}<br>${p.faculty ?? '-'}<br>${p.province ?? '-'}`);
+          const key = p.s_id || `${p.s_name}|${p.lat}|${p.long}`;
+          MARKERS.set(key, l);
+        }
+      }).addTo(resultsLayer);
+
+      const b = layer.getBounds?.();
+      if(b && b.isValid && b.isValid()) map.fitBounds(b.pad(0.2));
+    }
+
+    loadAgiData();
+  </script>
+</body>
+</html>

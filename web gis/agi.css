@@ -1,0 +1,207 @@
+/* 🎨 พาเลตจากภาพ:
+   ink    #1D1D1E, crimson #620A1A, deepred #A31E21,
+   gold   #C6953F, beige   #E9E3D6, offwhite #F9F7F5, brown #5C4033 */
+body { 
+  margin: 0; 
+  font-family: 'Inter', sans-serif; 
+  background-image: url('images/redturtle014.jpg'); /* 🔹 เพิ่มพื้นหลัง */
+  background-size: cover; /* ให้ภาพเต็มหน้าจอ */
+  background-position: center; /* จัดให้อยู่ตรงกลาง */
+  background-repeat: no-repeat; /* ไม่ซ้ำภาพ */
+  background-attachment: fixed; /* พื้นหลังคงที่เมื่อเลื่อน */
+  color: #1D1D1E; /* สีข้อความหลักเป็นสีดำเข้ม */
+  overflow-x: hidden;
+}
+
+/* ===== Topbar ===== */
+.topbar {
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  background: #1D1D1E;
+  border-bottom: 2px solid #C6953F;
+  color: #F9F7F5;
+  padding: 10px 20px; 
+  position: sticky; 
+  top: 0; 
+  z-index: 1000;
+}
+
+/* ===== Hamburger ===== */
+.hamburger { 
+  width: 22px; 
+  height: 16px; 
+  position: relative; 
+  border: none; 
+  background: none; 
+  cursor: pointer; 
+  padding: 0;
+}
+.hamburger span { 
+  position: absolute; 
+  left: 0; right: 0; 
+  height: 2px; 
+  background: #F9F7F5; 
+  border-radius: 1.5px; 
+  transition: transform .25s ease, opacity .25s ease, top .25s ease; 
+}
+.hamburger span:nth-child(1) { top: 0; } 
+.hamburger span:nth-child(2) { top: 7px; } 
+.hamburger span:nth-child(3) { top: 14px; }
+
+/* ===== ปุ่มออกจากระบบ ===== */
+.logout-btn {
+  background: #A31E21; 
+  color: #F9F7F5; 
+  border: none; 
+  padding: 8px 18px;
+  border-radius: 6px; 
+  font-weight: 600; 
+  cursor: pointer; 
+  transition: .2s;
+}
+.logout-btn:hover { background: #620A1A; }
+
+/* ===== Side menu ===== */
+.side-menu {
+  position: fixed; 
+  top: 0; 
+  left: -260px; 
+  width: 240px; 
+  height: 100%;
+  background: #C6953F; /* gold */
+  box-shadow: 2px 0 10px rgba(0,0,0,.1);
+  padding: 20px; 
+  transition: left .3s ease;
+  z-index: 980;
+  display: flex; 
+  flex-direction: column; 
+  gap: 12px;
+}
+.side-menu.open { left: 0; }
+
+.side-menu .hamburger {
+  margin-bottom: 16px; 
+  align-self: flex-start;
+}
+
+/* ✅ เมนู: ปกติพื้นทอง ตัวอักษรขาว */
+.side-menu a {
+  display: block;
+  padding: 12px 14px;
+  color: #F9F7F5 !important; /* สีขาว */
+  text-decoration: none;
+  border-bottom: 1px solid rgba(249,247,245,0.3);
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background .2s, color .2s, box-shadow .2s;
+}
+
+/* ✅ เมื่อเมาส์เลื่อนผ่าน — แถบสีขาว + ตัวอักษรน้ำตาลเข้ม */
+.side-menu a:hover {
+  background: #E9E3D6; /* สีขาวอมเบจ */
+  color: #5C4033 !important; /* น้ำตาลเข้ม */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+/* ===== Overlay ===== */
+.overlay {
+  position: fixed; 
+  top: 0; left: 0; 
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,.4); 
+  display: none; 
+  z-index: 950;
+}
+.overlay.show { display: block; }
+
+/* ===== Content ===== */
+.content {
+  padding: 25px; 
+  text-align: center;
+}
+
+/* ✅ เปลี่ยนสีข้อความหัวข้อ h3 */
+.content h3 {
+  color: #FFFFFF; /* สีขาว */
+  font-weight: 700;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.5); /* เพิ่มเงาให้อ่านชัดบนพื้นหลัง */
+}
+
+/* ===== Filter box ===== */
+.filter-box {
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  gap: 15px; 
+  flex-wrap: wrap;
+  background: #FFFFFF; 
+  padding: 20px; 
+  margin: 10px auto 25px;
+  border-radius: 15px; 
+  box-shadow: 0 2px 12px rgba(0,0,0,.08); 
+  width: fit-content;
+}
+
+/* ===== Form elements ===== */
+select {
+  padding: 6px 10px; 
+  border: 1px solid #ccc; 
+  border-radius: 6px; 
+  background: #fff; 
+  cursor: pointer; 
+  min-width: 220px; 
+  transition: .2s;
+}
+select:hover { border-color: #C6953F; }
+
+/* ✅ ปุ่มตกลง: สีเดียวกับปุ่มออกจากระบบ */
+.confirm-btn {
+  background: #A31E21; /* deepred */
+  color: #F9F7F5;
+  border: none; 
+  padding: 8px 18px; 
+  border-radius: 8px; 
+  cursor: pointer; 
+  font-weight: 600; 
+  transition: .2s;
+}
+.confirm-btn:hover {
+  background: #620A1A; /* crimson */
+}
+
+/* ===== Map & Result list ===== */
+#map {
+  width: 70%; 
+  height: 60vh; 
+  border-radius: 12px; 
+  box-shadow: 0 2px 12px rgba(0,0,0,.1); 
+  margin: 0 auto; 
+  display: inline-block;
+}
+.result-list {
+  margin-top: 20px; 
+  max-height: 300px; 
+  overflow-y: auto; 
+  padding: 10px; 
+  border: 1px solid #ddd; 
+  border-radius: 8px; 
+  background: white; 
+  display: inline-block; 
+  width: 25%; 
+  vertical-align: top; 
+  margin-left: 10px; 
+  text-align: left; 
+}
+.result-item {
+  margin-bottom: 8px; 
+  padding: 6px 8px; 
+  border-radius: 6px; 
+  cursor: pointer; 
+  line-height: 1.5; 
+}
+.result-item:hover { background: #E9E3D6; }
+
+/* Layer control */
+.topbar { z-index: 1000; }
+.side-menu { z-index: 980; }
